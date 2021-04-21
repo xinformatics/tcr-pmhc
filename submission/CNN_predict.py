@@ -1,3 +1,5 @@
+## Partial copy of CNN.py, this only evaluates the trained network
+
 import pandas as pd
 import numpy as np
 import ntpath
@@ -97,38 +99,10 @@ dataset = torch.utils.data.TensorDataset(X_train, y_train)
 trainloader = torch.utils.data.DataLoader(dataset, batch_size=1)
 testloader = torch.utils.data.DataLoader(dataset, batch_size=1)
 
-# Setup
-model = Model()
-model.train()
 
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001)
-device = torch.device("cpu")
+##### Instead of training, we import a trained model
+model = torch.load("model.pt")
 
-# Train
-for epoch in range(20):  # loop over the dataset multiple times
-    running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
-        # zero the parameter gradients
-        optimizer.zero_grad()
-        
-        X, y = data
-        X = X.float().requires_grad_(True)
-
-        # forward + backward + optimize
-        outputs = model(X)
-        loss = criterion(outputs, y)
-        loss.backward()
-        optimizer.step()
-
-    # print statistics
-    running_loss += loss.item()
-    if epoch % 5 == 0:    # print every 2000 mini-batches
-        print('Epoch %d, loss: %.3f' %
-              (epoch + 1, running_loss / 5))
-        running_loss = 0.0
-
-print('Finished Training\n')
 
 # Evaluate
 y_true = y_train
@@ -148,6 +122,3 @@ outname = "output_predictions.csv"
 print("\nSaving TEST set y_true, y_pred to", outname)
 df_performance = pd.DataFrame({"Complex":filenames[3:], "Test_y_true":y_true, "Test_y_pred":y_pred},)
 df_performance.to_csv(outname)
-
-# Write model to disk for use in CNN_predict.py
-torch.save(model, "model.pt")
