@@ -2,7 +2,7 @@ biolib_version: 2
 modules:
     main:
         image: 'local-docker://cbh2021:latest'
-        command: ''
+        command: 'python'
         working_directory: /home/biolib/
         input_files:
             - COPY / /home/biolib/
