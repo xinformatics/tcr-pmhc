@@ -30,7 +30,7 @@ def normalize(dataset_X):
 # Load files
 filenames = []
 dfs = []
-for fp in glob.glob("data/*.csv.gz"):
+for fp in glob.glob("./data/*.csv.gz"):
     filenames.append(ntpath.basename(fp))
     dfs.append(pd.read_csv(fp).T)
     
