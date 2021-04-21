@@ -4,8 +4,7 @@ WORKDIR /home/biolib
 
 COPY submission/tcrpmhc/environment.yml .
 
-# RUN conda env update -n base --file=environment.yml
-
-RUN conda install --yes pytorch scikit-learn pandas numpy
+RUN conda install --yes nomkl pytorch scikit-learn pandas numpy && \
+    conda clean -afy
 
 COPY . .
