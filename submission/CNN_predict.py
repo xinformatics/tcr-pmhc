@@ -102,7 +102,7 @@ testloader = torch.utils.data.DataLoader(dataset, batch_size=1)
 
 ##### Instead of training, we import a trained model
 model = torch.load("model.pt")
-
+model.eval()
 
 # Evaluate
 y_true = y_train
