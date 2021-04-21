@@ -26,7 +26,7 @@ jobs:
                 run: pip3 install pybiolib
 
             -   name: Publish new version to BioLib if on main branch
-                if: github.ref == 'refs/heads/main'
+                if: github.ref == 'refs/heads/master'
                 run: biolib push $BIOLIB_PROJECT_URI --path submission
                 env:
                     BIOLIB_PROJECT_URI: ${{ secrets.BIOLIB_PROJECT_URI }}
