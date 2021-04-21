@@ -2,7 +2,7 @@ biolib_version: 2
 modules:
     main:
         image: 'local-docker://cbh2021:latest'
-        command: python tcrpmhc/CNN.py
+        command: python CNN.py
         working_directory: /home/biolib/
         input_files:
             - COPY / /home/biolib/
