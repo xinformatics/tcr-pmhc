@@ -7,3 +7,5 @@ RUN conda install --yes pytorch scikit-learn pandas numpy \
     conda clean -afy
 
 COPY . .
+
+ENTRYPOINT [ "python" ]
