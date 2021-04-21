@@ -1,4 +1,4 @@
-name: tcrpmhc
+name: base
 channels:
   - conda-forge
   - defaults
@@ -65,4 +65,3 @@ dependencies:
   - xz=5.2.5=haf1e3a3_1
   - zlib=1.2.11=h7795811_1010
   - zstd=1.4.9=h582d3a0_0
-prefix: /Users/admin/opt/anaconda3/envs/tcrpmhc
