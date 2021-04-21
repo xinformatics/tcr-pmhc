@@ -1,9 +1,7 @@
-FROM python:3.9-slim
+FROM continuumio/miniconda3
 
 WORKDIR /home/biolib
 
-RUN pip install torch scikit-learn pandas numpy
+RUN conda install --yes pytorch scikit-learn pandas numpy
 
 COPY . .
-
-CMD python3 CNN.py
