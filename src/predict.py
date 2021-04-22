@@ -67,7 +67,7 @@ model.eval()
 y_pred = predict(model, X_test)
 
 # Write y_true, y_pred to disk
-outname = "output_predictions.csv"
+outname = "predictions.csv"
 print("\nSaving TEST set y_pred to", outname)
 df_performance = pd.DataFrame({"name": filenames, "prediction": y_pred},)
 df_performance.to_csv(outname, index=False)
