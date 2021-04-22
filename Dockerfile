@@ -8,4 +8,4 @@ RUN conda install --yes pytorch scikit-learn pandas numpy \
 
 COPY . .
 
-ENTRYPOINT [ "python" ]
+ENTRYPOINT [ "python", "src/predict.py" ]

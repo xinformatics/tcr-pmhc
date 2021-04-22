@@ -30,7 +30,7 @@ def normalize(dataset_X):
 # Load files
 filenames = []
 dfs = []
-for fp in glob.glob("./data/*.csv.gz"):
+for fp in glob.glob("../data/*.csv.gz"):
     filenames.append(ntpath.basename(fp))
     dfs.append(pd.read_csv(fp).T)
     
@@ -149,5 +149,5 @@ print("\nSaving TEST set y_true, y_pred to", outname)
 df_performance = pd.DataFrame({"Complex":filenames[3:], "Test_y_true":y_true, "Test_y_pred":y_pred},)
 df_performance.to_csv(outname)
 
-# Write model to disk for use in CNN_predict.py
+# Write model to disk for use in predict.py
 torch.save(model, "model.pt")
