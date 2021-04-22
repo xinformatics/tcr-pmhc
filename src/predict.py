@@ -1,8 +1,11 @@
-
+import argparse
 import pandas as pd
 import numpy as np
 import ntpath
 import glob
+import os
+import tempfile
+import zipfile
 
 # PyTorch libraries and modules
 import torch
@@ -12,29 +15,26 @@ from torch.autograd import Variable
 from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax, BatchNorm2d, Dropout
 import torch.optim as optim
 
-from sklearn.metrics import accuracy_score
 
+# this line is needed to load in the model
+from model import Model, normalize
 
-def normalize(dataset_X):
-    from sklearn.preprocessing import StandardScaler
-    scaler = StandardScaler()
-    scaler.fit(dataset_X[0][24:])
-    
-    out = []
-    for i in range(len(dataset_X)):
-        arr = dataset_X[i]
-        arr[24:] = scaler.transform(arr[24:])
-        out.append(arr)
-    out = np.stack(out)
-    return out
+parser = argparse.ArgumentParser()
+parser.add_argument('--input-zip')
+args = parser.parse_args()
 
 # Load files
 filenames = []
 dfs = []
-for fp in glob.glob("data/*.csv.gz"):
-    filenames.append(ntpath.basename(fp))
-    dfs.append(pd.read_csv(fp).T)
-    
+with tempfile.TemporaryDirectory() as tmpdir:
+    with zipfile.ZipFile(args.input_zip) as zip:
+        files = [file for file in zip.infolist() if file.filename.endswith(".csv.gz")]
+        for file in files:
+            zip.extract(file, tmpdir)
+    for fp in glob.glob(os.path.join(tmpdir, "*.csv.gz")):
+        filenames.append(ntpath.basename(fp))
+        dfs.append(pd.read_csv(fp).T)
+
 # ML dataset
 dataset_X = np.stack(dfs)
 dataset_X = normalize(dataset_X)
@@ -51,7 +51,7 @@ def predict(model, X):
 
     y_pred = []
     for i in range(len(dataiter)):
-        X = dataiter.next()
+        X = dataiter.next()[0]
         X = X.float()
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)
@@ -66,10 +66,10 @@ model.eval()
 
 y_pred = predict(model, X_test)
 
-print("y_pred", y_pred, end = "\n")
-
 # Write y_true, y_pred to disk
 outname = "output_predictions.csv"
 print("\nSaving TEST set y_pred to", outname)
-df_performance = pd.DataFrame({"Complex": filenames, "Y_pred": y_pred},)
-df_performance.to_csv(outname)
+df_performance = pd.DataFrame({"name": filenames, "prediction": y_pred},)
+df_performance.to_csv(outname, index=False)
+
+print(open(outname, 'r').read())

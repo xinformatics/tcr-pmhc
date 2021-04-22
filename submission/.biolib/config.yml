@@ -11,4 +11,11 @@ modules:
         source_files:
             - COPY / /home/biolib/
 
-arguments: []
+arguments:
+    -
+        default_value: 'input.zip'
+        description: 'A zip file containing the .csv.gz files to run prediction on:'
+        key: '--input-zip'
+        key_value_separator: ' '
+        required: true
+        type: file
