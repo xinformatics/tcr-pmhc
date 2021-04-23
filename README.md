@@ -11,9 +11,8 @@ At prediction time, you are given a zip file using the `--input-zip` argument.
 For each `*.npz` file, output your prediction. 
 
 ## Data and example model
-Unzip the data/training_set.zip file to get started. The .npy files should
-be put in the data/train directory.
-An example CNN model is available in the notebook and src directory.
+The training dataset can be found in the data/training_set.zip file, and should be extracted to the data/train folder.
+An example CNN model is available as a notebook and in src directory.
 
 ~~The dataset can be found at~~
 ~~https://www.dropbox.com/sh/uudmmyjo4feem2f/AAChSkluA0PkLdW7y2tw1-lca?dl=0~~
