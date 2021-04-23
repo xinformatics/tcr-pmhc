@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import argparse
+from sklearn.metrics import matthews_corrcoef
 
 def benchmark(predictions_file, actuals_file):
     predictions = pd.read_csv(predictions_file).to_dict(orient="records")
