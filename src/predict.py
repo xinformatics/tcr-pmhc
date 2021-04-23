@@ -3,7 +3,6 @@ import glob, os, tempfile, zipfile
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.metrics import f1_score, accuracy_score
 from sklearn.metrics import roc_curve, confusion_matrix
