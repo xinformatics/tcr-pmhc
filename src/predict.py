@@ -31,27 +31,20 @@ with tempfile.TemporaryDirectory() as tmpdir:
             
         # Load npz files
         data_list = []
-        target_list = []
 
         for fp in glob.glob(tmpdir + "/*input.npz"):
             data = np.load(fp)["arr_0"]
-            targets = np.load(fp.replace("input", "labels"))["arr_0"]
 
             data_list.append(data)
-            target_list.append(targets)
          
 X_test = np.concatenate(data_list[:])
-y_test = np.concatenate(target_list[:])
 nsamples, nx, ny = X_test.shape
 print("test set shape:", nsamples,nx,ny)
 
-test_ds = []
-for i in range(len(X_test)):
-    test_ds.append([np.transpose(X_test[i]), y_test[i]])
 
 bat_size = 64
 print("\nNOTE:\nSetting batch-size to", bat_size)
-test_ldr = torch.utils.data.DataLoader(test_ds,batch_size=bat_size, shuffle=False)
+test_ldr = torch.utils.data.DataLoader(X_test,batch_size=bat_size, shuffle=False)
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,11 +53,10 @@ print("Using device (CPU/GPU):", device)
 
 def predict(net, test_ldr):
     net.eval()
-    test_preds, test_targs = [], []
+    test_preds = []
     with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(test_ldr): ###
+        for batch_idx, data in enumerate(test_ldr): ###
             x_batch_val = data.float().detach()
-            y_batch_val = target.float().detach().unsqueeze(1)
 
             output = net(x_batch_val)
             preds = np.round(output.detach())
@@ -72,9 +64,6 @@ def predict(net, test_ldr):
         
     return(test_preds)
 
-from sklearn.metrics import matthews_corrcoef
-def performance(y_true, y_pred):
-    return matthews_corrcoef(y_true, y_pred)
     
 
 # import trained model
