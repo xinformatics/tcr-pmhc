@@ -1,7 +1,4 @@
 # T-cell binding prediction challenge (TCR-pMHC)
-This repository is a template for creating challenges. You can change this README to describe your challenge in detail.
-
-The participants will fork this challenge repository at the beginning of the hackathon.
 
 ## Challenge Aim
 
