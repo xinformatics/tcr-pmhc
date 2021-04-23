@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
         files = [file for file in zip.infolist() if file.filename.endswith(".npz")]
         for file in files:
             zip.extract(file, tmpdir)
-            
+
         # Load npz files
         data_list = []
 
@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
             data = np.load(fp)["arr_0"]
 
             data_list.append(data)
-         
+
 X_test = np.concatenate(data_list[:])
 nsamples, nx, ny = X_test.shape
 print("test set shape:", nsamples,nx,ny)
@@ -58,16 +58,16 @@ def predict(net, test_ldr):
     net.eval()
     test_preds = []
     with torch.no_grad():
-        for batch_idx, data in enumerate(test_ldr): ###
-            x_batch_val = data.float().detach()
+        for batch_idx, data in enumerate(test_ldr):
+            x_batch_val = data[0].float().detach()
 
             output = net(x_batch_val)
             preds = np.round(output.detach())
-            test_preds += list(preds.data.numpy().flatten()) 
-        
+            test_preds += list(preds.data.numpy().flatten())
+
     return(test_preds)
 
-    
+
 
 # import trained model
 model = Net(num_classes = 1)
