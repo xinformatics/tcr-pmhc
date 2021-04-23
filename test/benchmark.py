@@ -6,21 +6,9 @@ def benchmark(predictions_file, actuals_file):
     predictions = pd.read_csv(predictions_file).to_dict(orient="records")
     actuals = pd.read_csv(actuals_file).to_dict(orient="records")
 
-    predictions_dict = {}
-    for prediction in predictions:
-        predictions_dict[prediction["ix"]] = prediction["prediction"]
-
-    actuals_dict = {}
-    for actual in actuals:
-        actuals_dict[actual["ix"]] = actual["actual"]
-
-    results = []
-    for (name, actual) in actuals_dict.items():
-        results.append(1 if predictions_dict[name] == actual else 0)
-
-    accuracy = np.array(results).mean()
+    mcc = matthews_corrcoef(actuals, predictions)
     result = {}
-    result["accuracy"] = accuracy
+    result["mcc"] = mcc
     return result
 
 if __name__ == "__main__":
