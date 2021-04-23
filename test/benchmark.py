@@ -8,11 +8,11 @@ def benchmark(predictions_file, actuals_file):
 
     predictions_dict = {}
     for prediction in predictions:
-        predictions_dict[prediction["name"]] = prediction["prediction"]
+        predictions_dict[prediction["ix"]] = prediction["prediction"]
 
     actuals_dict = {}
     for actual in actuals:
-        actuals_dict[actual["name"]] = actual["actual"]
+        actuals_dict[actual["ix"]] = actual["actual"]
 
     results = []
     for (name, actual) in actuals_dict.items():
