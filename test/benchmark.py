@@ -4,10 +4,10 @@ import argparse
 from sklearn.metrics import matthews_corrcoef
 
 def benchmark(predictions_file, actuals_file):
-    predictions = pd.read_csv(predictions_file).to_dict(orient="records")
-    actuals = pd.read_csv(actuals_file).to_dict(orient="records")
+    predictions = pd.read_csv(predictions_file)
+    actuals = pd.read_csv(actuals_file)
 
-    mcc = matthews_corrcoef(actuals, predictions)
+    mcc = matthews_corrcoef(actuals["actual"], predictions["prediction"])
     result = {}
     result["mcc"] = mcc
     return result
