@@ -41,10 +41,13 @@ X_test = np.concatenate(data_list[:])
 nsamples, nx, ny = X_test.shape
 print("test set shape:", nsamples,nx,ny)
 
+test_ds = []
+for i in range(len(X_test)):
+    test_ds.append([np.transpose(X_test[i])])
 
 bat_size = 64
 print("\nNOTE:\nSetting batch-size to", bat_size)
-test_ldr = torch.utils.data.DataLoader(X_test,batch_size=bat_size, shuffle=False)
+test_ldr = torch.utils.data.DataLoader(test_ds,batch_size=bat_size, shuffle=False)
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
