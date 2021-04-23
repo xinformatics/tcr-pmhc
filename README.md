@@ -21,9 +21,10 @@ An example CNN model is available as a notebook and in src directory.
 You code should output a file called `predictions.csv` in the following format:
 
 ```
-name,prediction
-filename1,1
-filename2,0
+index,prediction
+0,1
+1,0
+2,0
 ```
 
 ## Benchmarking System
