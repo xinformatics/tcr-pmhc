@@ -1,75 +1,94 @@
 import argparse
+import glob, os, tempfile, zipfile
+
 import pandas as pd
 import numpy as np
-import ntpath
-import glob
-import os
-import tempfile
-import zipfile
-
-# PyTorch libraries and modules
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import roc_curve, confusion_matrix
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax, BatchNorm2d, Dropout
-import torch.optim as optim
+import torch.nn as nn  # All neural network modules, nn.Linear, nn.Conv2d, BatchNorm, Loss functions
+import torch.optim as optim  # For all Optimization algorithms, SGD, Adam, etc.
+import torch.nn.functional as F  # All functions that don't have any parameters
+from sklearn.metrics import accuracy_score
 
-
-# this line is needed to load in the model
-from model import Model, normalize
+# Needed to predict
+from model import Net
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input-zip')
 args = parser.parse_args()
+print(args)
 
 # Load files
 filenames = []
 dfs = []
 with tempfile.TemporaryDirectory() as tmpdir:
     with zipfile.ZipFile(args.input_zip) as zip:
-        files = [file for file in zip.infolist() if file.filename.endswith(".csv.gz")]
+        files = [file for file in zip.infolist() if file.filename.endswith(".npz")]
         for file in files:
             zip.extract(file, tmpdir)
-    for fp in glob.glob(os.path.join(tmpdir, "*.csv.gz")):
-        filenames.append(ntpath.basename(fp))
-        dfs.append(pd.read_csv(fp).T)
+            
+        # Load npz files
+        data_list = []
+        target_list = []
 
-# ML dataset
-dataset_X = np.stack(dfs)
-dataset_X = normalize(dataset_X)
+        for fp in glob.glob(tmpdir + "/*input.npz"):
+            data = np.load(fp)["arr_0"]
+            targets = np.load(fp.replace("input", "labels"))["arr_0"]
 
-X_test = torch.from_numpy(dataset_X)
+            data_list.append(data)
+            target_list.append(targets)
+         
+X_test = np.concatenate(data_list[:])
+y_test = np.concatenate(target_list[:])
+nsamples, nx, ny = X_test.shape
+print("test set shape:", nsamples,nx,ny)
 
-def predict(model, X):
-    model.eval()
+test_ds = []
+for i in range(len(X_test)):
+    test_ds.append([np.transpose(X_test[i]), y_test[i]])
+
+bat_size = 64
+print("\nNOTE:\nSetting batch-size to", bat_size)
+test_ldr = torch.utils.data.DataLoader(test_ds,batch_size=bat_size, shuffle=False)
+
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device (CPU/GPU):", device)
+#device = torch.device("cpu")
+
+def predict(net, test_ldr):
+    net.eval()
+    test_preds, test_targs = [], []
+    with torch.no_grad():
+        for batch_idx, (data, target) in enumerate(test_ldr): ###
+            x_batch_val = data.float().detach()
+            y_batch_val = target.float().detach().unsqueeze(1)
+
+            output = net(x_batch_val)
+            preds = np.round(output.detach())
+            test_preds += list(preds.data.numpy().flatten()) 
+        
+    return(test_preds)
+
+from sklearn.metrics import matthews_corrcoef
+def performance(y_true, y_pred):
+    return matthews_corrcoef(y_true, y_pred)
     
-    # Test set
-    dataset = torch.utils.data.TensorDataset(X)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1)
-    dataiter = iter(loader)
-
-    y_pred = []
-    for i in range(len(dataiter)):
-        X = dataiter.next()[0]
-        X = X.float()
-        outputs = model(X)
-        _, predicted = torch.max(outputs, 1)
-        y_pred.append(predicted.item())
-
-    return(y_pred)
-
 
 # import trained model
-model = torch.load("src/model.pt")
+model = Net(num_classes = 1)
+model.load_state_dict(torch.load("src/model.pt"))
 model.eval()
 
-y_pred = predict(model, X_test)
+y_pred = predict(model, test_ldr)
 
 # Write y_true, y_pred to disk
 outname = "predictions.csv"
 print("\nSaving TEST set y_pred to", outname)
-df_performance = pd.DataFrame({"name": filenames, "prediction": y_pred},)
+df_performance = pd.DataFrame({"ix": range(len(y_pred)), "prediction": y_pred},)
 df_performance.to_csv(outname, index=False)
 
 print(open(outname, 'r').read())

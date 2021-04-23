@@ -1,36 +1,43 @@
-import torch.nn as nn
+import glob
+
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import roc_curve, confusion_matrix
+import torch
+import torch.nn as nn  # All neural network modules, nn.Linear, nn.Conv2d, BatchNorm, Loss functions
+import torch.optim as optim  # For all Optimization algorithms, SGD, Adam, etc.
+import torch.nn.functional as F  # All functions that don't have any parameters
+from sklearn.metrics import accuracy_score
 
 # ML architecture
-class Model(nn.Module):
-    def __init__(self, inp1=407, out=2):
-        super().__init__()
-        self.Dense1 = nn.Linear(inp1, 32)
-        self.relu1 = nn.ReLU()
-        self.Dense2 = nn.Linear(32, 1)
-        self.relu2 = nn.ReLU()
-        self.Dense3 = nn.Linear(142, 2)
-        self.relu3 = nn.ReLU()
-        self.out = nn.Softmax(1)
 
-    def forward(self, x):
-        x = self.relu1(self.Dense1(x))
-        x = self.relu2(self.Dense2(x))
-        x = x.view(-1, 142)
-        x = self.relu3(self.Dense3(x))
-        x = self.out(x)
+class Net(nn.Module):
+    num_classes = 1
+    def __init__(self,  num_classes):
+        super(Net, self).__init__()       
+        self.conv1 = nn.Conv1d(in_channels=54, out_channels=100, kernel_size=3, stride=2, padding=1)
+        torch.nn.init.kaiming_uniform_(self.conv1.weight)
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.conv1_bn = nn.BatchNorm1d(100)
+        
+        self.conv2 = nn.Conv1d(in_channels=100, out_channels=100, kernel_size=3, stride=2, padding=1)
+        torch.nn.init.kaiming_uniform_(self.conv2.weight)
+        self.conv2_bn = nn.BatchNorm1d(100)
+        
+        self.fc1 = nn.Linear(2600, num_classes)
+        torch.nn.init.xavier_uniform_(self.fc1.weight)
+        
+    def forward(self, x):      
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.conv1_bn(x)
+        
+        x = self.pool(F.relu(self.conv2(x)))
+        x = self.conv2_bn(x)
+        
+        x = x.view(x.size(0), -1)
+        x = torch.sigmoid(self.fc1(x))
+        
         return x
-
-
-def normalize(dataset_X):
-    from sklearn.preprocessing import StandardScaler
-    scaler = StandardScaler()
-    scaler.fit(dataset_X[0][24:])
-
-    out = []
-    for i in range(len(dataset_X)):
-        arr = dataset_X[i]
-        arr[24:] = scaler.transform(arr[24:])
-        out.append(arr)
-    out = np.stack(out)
-    return out
